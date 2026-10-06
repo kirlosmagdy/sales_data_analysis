@@ -2,11 +2,12 @@
 
 # 📊 Sales Data Analysis & Interactive Dashboard
 
-**End-to-end Python project: from messy sales data to clean insights and a business-ready dashboard**
+**From 26K raw sales records to validated data, clear KPIs, and business-ready insights**
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Cleaning-150458?logo=pandas&logoColor=white)
-![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Charts-3F4F75?logo=plotly&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-Validation-013243?logo=numpy&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power%20BI-Dashboard-F2C811?logo=powerbi&logoColor=black)
 ![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
 
 </div>
@@ -20,9 +21,11 @@
 - [Tech Stack](#-tech-stack)
 - [Workflow](#-workflow)
 - [Data Quality Report](#-data-quality-report)
+- [Feature Engineering](#-feature-engineering)
 - [Dashboard](#-dashboard)
 - [Key Insights](#-key-insights)
-- [Project Structure](#-project-structure)
+- [Recommendations](#-recommendations)
+- [Repository Structure](#-repository-structure)
 - [How to Run](#-how-to-run)
 - [Author](#-author)
 
@@ -30,108 +33,144 @@
 
 ## 🎯 Project Overview
 
-Raw sales data is rarely ready for decision-making. This project takes a sales dataset (`FactSale.csv`) through a complete analytics pipeline: **validation → cleaning → imputation → exploratory analysis → KPI design → interactive dashboard**, all built in **Python**.
+This project takes a raw sales fact table (`FactSale.csv`) through a complete analytics pipeline: **validation → cleaning → feature engineering → KPI design → interactive dashboard → business insights**.
 
-The goal is to turn transactional records into clear, actionable answers about revenue, product performance, and sales trends.
+Before any analysis, every financial field was **re-calculated and verified** (revenue, tax, totals, quantities) so the numbers behind the dashboard can be trusted. The final dashboard turns **26,397 sale line items** across **3+ years (2013 to May 2016)** into clear answers about revenue, profit, products, and order behavior.
 
 ## 💼 Business Objectives
 
-- Ensure the data is **accurate, consistent, and trustworthy** before analysis
-- Track the **core sales KPIs** (revenue, quantity, average order value, growth)
-- Identify **top-performing and underperforming** products, categories, and regions
-- Uncover **time-based trends and seasonality**
-- Deliver **business-focused recommendations** backed by data
+- Make sure the data is **accurate, consistent, and trustworthy** before analysis
+- Track the **core KPIs**: revenue, profit, profit margin, and order volume
+- Identify the **products and categories** that drive the business
+- Understand **order-size behavior** and its contribution to revenue
+- Uncover **time-based trends** in profit and revenue
+- Deliver **actionable recommendations** backed by data
 
 ## 🗂 Dataset
 
 | Property | Details |
 |---|---|
-| **File** | `FactSale.csv` |
-| **Type** | Sales fact table (transaction-level) |
-| **Rows × Columns** | `[add number of rows]` × `[add number of columns]` |
-| **Period covered** | `[add date range]` |
+| **File** | `FactSale.csv` (sales fact table) |
+| **Rows** | 26,397 sale line items |
+| **Columns** | 21 raw columns (20 after cleaning, plus engineered features) |
+| **Period covered** | 2013 to 31 May 2016 |
+| **Grain** | One row per invoice line item |
 
-**Main fields:** `[list key columns, e.g. date, product, quantity, unit price, sales amount, customer/region]`
+**Main fields:** `Sale Key`, `Customer Key`, `Stock Item Key`, `Invoice Date Key`, `Delivery Date Key`, `Description`, `Package`, `Quantity`, `Unit Price`, `Tax Rate`, `Total Excluding Tax`, `Tax Amount`, `Total Including Tax`, `Profit`, `Total Dry Items`, `Total Chiller Items`
 
 ## 🛠 Tech Stack
 
 | Purpose | Tools |
 |---|---|
 | Language | Python |
-| Data manipulation | Pandas, NumPy |
-| Visualization | Plotly, Matplotlib, Seaborn |
-| Dashboard | `[Plotly Dash / Streamlit, adjust to what you used]` |
+| Data cleaning & validation | Pandas, NumPy |
 | Environment | Jupyter Notebook |
+| Dashboard | Power BI |
 
 ## 🔄 Workflow
 
 ```
-Raw Data  →  Validation  →  Cleaning  →  Imputation  →  EDA  →  KPIs  →  Dashboard  →  Insights
+Raw Data → Validation → Cleaning → Feature Engineering → KPIs → Dashboard → Insights
 ```
 
-1. **Data Understanding:** inspected structure, data types, ranges, and distributions
-2. **Validation:** checked for duplicates, invalid values, inconsistent formats, and outliers
-3. **Cleaning:** standardized data types and formats, removed duplicates, fixed inconsistencies
-4. **Imputation:** handled missing values using methods suited to each column (median/mode/group-based)
-5. **Exploratory Analysis:** analyzed trends, distributions, and relationships
-6. **KPI Design:** defined metrics that matter to the business
-7. **Dashboard:** built interactive visuals with filters for self-service exploration
-8. **Insights:** translated findings into recommendations
+1. **Data Understanding:** reviewed structure, types, and null counts (`df.info()`)
+2. **Validation:** checked duplicates, recalculated all financial fields, and tested business rules
+3. **Cleaning:** fixed data types, trimmed text, flagged missing deliveries, handled placeholder customers, dropped a constant ETL column
+4. **Feature Engineering:** added date parts, profit margin, loss flag, order-size buckets, customer type, and product category
+5. **Dashboard:** built KPIs and visuals on the cleaned dataset
+6. **Insights:** translated findings into business recommendations
 
 ## 🧹 Data Quality Report
 
-| Issue Found | How It Was Handled |
-|---|---|
-| Missing values | `[e.g. median for numeric, mode for categorical]` |
-| Duplicate records | `[e.g. removed exact duplicates]` |
-| Inconsistent formats | `[e.g. standardized dates and text casing]` |
-| Outliers / invalid values | `[e.g. flagged and treated using IQR]` |
+| # | Check / Issue | Finding | How It Was Handled |
+|---|---|---|---|
+| 1 | **Duplicates** (full-row and `Sale Key`) | 0 found | No action needed |
+| 2 | **Date columns stored as text** | `Invoice Date Key` and `Delivery Date Key` were `object` type | Converted to `datetime` (`%m/%d/%Y`) |
+| 3 | **Missing delivery dates** | 13 rows, all invoiced on **31 May 2016** (last day of the data) | Not imputed. Flagged with a `Delivery Status` column (`Pending` / `Delivered`), since these are genuinely undelivered orders, not bad data |
+| 4 | **Placeholder customers** (`Customer Key = 0`) | 9,077 rows (**34.39%**) | Labeled as `Unknown/Walk-in Customer` and tagged in `Customer Type` instead of dropping or guessing |
+| 5 | **Constant ETL column** (`Lineage Key`) | Single value (11) in every row | Dropped, as it adds no analytical value |
+| 6 | **Text formatting** (`Description`, `Package`) | Possible stray whitespace | Trimmed. Package types verified: `Each`, `Packet`, `Pair`, `Bag` |
+| 7 | **Revenue math** (`Quantity × Unit Price`) | 0 mismatches | ✅ Pass |
+| 8 | **Tax amount** (rate × net, round-half-up) | 0 mismatches | ✅ Pass |
+| 9 | **Total including tax** (net + tax) | 0 mismatches | ✅ Pass |
+| 10 | **Quantity balance** (Dry + Chiller items = Quantity) | 0 mismatches | ✅ Pass |
+| 11 | **Negative profit** | 566 rows (**2.14%**). 492 of them share the exact same margin (−5.56%), suggesting a repeatable pricing pattern rather than random errors | Kept as real business data and flagged with `Is_Loss_Sale` |
+| 12 | **Delivery lag** | Every delivered order shipped exactly **1 day** after invoicing | ✅ Consistent. No exceptions |
+| 13 | **Outliers** (per-product IQR) | 74 unit-price outliers (0.28%) and 4 quantity outliers (0.02%) | Kept, since they are a negligible share and plausible for sales data |
 
-> Update the table with the actual issues and counts from your notebook.
+> **Missing values:** the only nulls in the dataset were the 13 delivery dates above, so no statistical imputation was needed.
+
+## 🧩 Feature Engineering
+
+| New Column | Logic |
+|---|---|
+| `Invoice Year`, `Quarter`, `Month`, `Month Name`, `Day of Week` | Extracted from the invoice date |
+| `Profit Margin %` | `Profit / Total Excluding Tax` |
+| `Is_Loss_Sale` | `True` when `Profit < 0` |
+| `Order Size` | **Small** (≤ 10 units), **Medium** (11 to 60), **Large** (61+) |
+| `Customer Type` | `Known` vs `Unknown/Walk-in` |
+| `Delivery Status` | `Delivered` vs `Pending` |
+| `Product_Category` | Keyword matching on `Description` into 6 categories: Packaging & Shipping Supplies, Apparel & Wearables, Toys & Seasonal, General Merchandise, Electronics & Accessories, Drinkware & Novelty |
 
 ## 📈 Dashboard
 
-> 📸 *Add a screenshot or GIF of your dashboard here:*
->
-> `![Dashboard Preview](images/dashboard.png)`
+![Sales Dashboard](images/dashboard.png)
 
-**Key KPIs:**
-- 💰 Total Sales / Revenue
-- 📦 Total Quantity Sold
-- 🧾 Average Order Value
-- 📆 Monthly / Yearly Growth
-- 🏆 Top Products & Categories
+**KPIs:**
 
-**Visuals included:** sales trend over time, top/bottom performers, category and regional breakdowns, and interactive filters.
+| Metric | Value |
+|---|---|
+| 💰 Total Revenue | **~$20M** |
+| 📈 Total Profit | **$9.92M** |
+| 🧾 Total Orders | **8.19K** |
+| 🎯 Profit Margin | **~50%** (profit ÷ revenue) |
+
+**Visuals:**
+- **Order Size Distribution:** count of sales by Small / Medium / Large orders
+- **Total Revenue by Product Category:** which categories drive the business
+- **Monthly Profit Trend:** profit by year and month (Jan 2013 to 2016)
 
 ## 💡 Key Insights
 
-1. **`[Insight 1]`**: e.g. Sales peak in `[month/season]`, suggesting `[action]`
-2. **`[Insight 2]`**: e.g. Top `[X]` products generate `[Y]%` of revenue
-3. **`[Insight 3]`**: e.g. `[Region/category]` underperforms despite `[reason]`
-4. **Recommendation:** `[one clear business action based on the findings]`
+1. **📈 Steady growth, then a slowdown.** Revenue grew every full year from 2013 to 2015 (**$5.26M → $5.84M → $6.35M, +20.7%** overall). The 5 completed months of 2016 ($2.43M) annualize to about **$5.83M**, which is below 2015's pace.
 
-## 📁 Project Structure
+2. **📦 One category dominates.** *Packaging & Shipping Supplies* alone brings in **58.1% of total revenue ($11.5M)**, nearly **6× the next-largest category**, Apparel & Wearables (21.3%). The business is highly concentrated.
+
+3. **🛒 A quarter of orders drive half the revenue.** *Large* orders (61+ units) are only **23.8% of line items** but generate **49.8% of revenue**.
+
+4. **🚚 Flawless fulfillment.** **26,384 of 26,397** orders shipped exactly **one day** after invoicing, with zero exceptions across 3+ years. The only 13 unfulfilled orders were all dated on the very last day of the dataset.
+
+5. **🔍 Profit is seasonal and volatile.** Monthly profit swings between roughly **$160K and $300K**, with repeated peaks and dips each year, which points to a seasonal sales cycle.
+
+6. **⚠️ Small but systematic losses.** 2.14% of sales lose money, and most of them (492 of 566) share the same −5.56% margin, which suggests a specific pricing or discount rule worth reviewing.
+
+7. **👤 Weak customer visibility.** 34.39% of sales come from unknown / walk-in customers, which limits customer-level analysis.
+
+## ✅ Recommendations
+
+- **Diversify revenue:** reduce dependence on Packaging & Shipping Supplies by growing Apparel, Toys, and Electronics
+- **Protect large orders:** offer bulk-order incentives and account management, as they generate half the revenue
+- **Investigate the loss-making pattern:** review the pricing or discount rule behind the repeated −5.56% margin
+- **Plan for seasonality:** align inventory and promotions with profit peaks and troughs
+- **Improve customer capture:** collect customer IDs at checkout to enable retention and segmentation analysis
+- **Monitor the 2016 slowdown:** track monthly revenue against 2015 to confirm whether growth is stalling
+
+## 📁 Repository Structure
 
 ```
 sales_data_analysis/
 │
-├── data/
-│   ├── FactSale.csv              # Raw dataset
-│   └── cleaned_FactSale.csv      # Cleaned dataset
+├── Data_Files/
+│   ├── Raw_Files/
+│   │   └── FactSale.csv              # Raw dataset
+│   └── Cleaned_files/
+│       └── cleaned_sales.csv         # Cleaned + engineered dataset
 │
-├── notebooks/
-│   └── sales_analysis.ipynb      # Cleaning, EDA, and analysis
-│
-├── dashboard/
-│   └── app.py                    # Interactive dashboard
-│
-├── images/                       # Dashboard screenshots
-├── requirements.txt
+├── sales_data_analysis.ipynb         # Cleaning, validation & feature engineering
+├── images/
+│   └── dashboard.png                 # Dashboard screenshot
 └── README.md
 ```
-
-> Adjust the tree to match your actual repository layout.
 
 ## 🚀 How to Run
 
@@ -141,14 +180,13 @@ git clone https://github.com/kirlosmagdy/sales_data_analysis.git
 cd sales_data_analysis
 
 # 2. Install dependencies
-pip install -r requirements.txt
+pip install pandas numpy jupyter
 
-# 3. Explore the analysis
-jupyter notebook
-
-# 4. Launch the dashboard
-python dashboard/app.py
+# 3. Open the notebook
+jupyter notebook sales_data_analysis.ipynb
 ```
+
+> ⚠️ Update the file paths inside the notebook (`pd.read_csv(...)` and `df.to_csv(...)`) to match your local folder before running.
 
 ## 👤 Author
 
