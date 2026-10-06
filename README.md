@@ -112,11 +112,6 @@ Raw Data → Validation → Cleaning → Feature Engineering → KPIs → Dashbo
 | `Delivery Status` | `Delivered` vs `Pending` |
 | `Product_Category` | Keyword matching on `Description` into 6 categories: Packaging & Shipping Supplies, Apparel & Wearables, Toys & Seasonal, General Merchandise, Electronics & Accessories, Drinkware & Novelty |
 
-## 📈 Dashboard
-
-![Sales Dashboard](<img width="1198" height="677" alt="1" src="https://github.com/user-attachments/assets/2769858b-9148-41e1-a872-c6e24738d7b2" />
-)
-
 **KPIs:**
 
 | Metric | Value |
