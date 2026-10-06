@@ -114,7 +114,8 @@ Raw Data → Validation → Cleaning → Feature Engineering → KPIs → Dashbo
 
 ## 📈 Dashboard
 
-![Sales Dashboard](images/dashboard.png)
+![Sales Dashboard](<img width="1198" height="677" alt="1" src="https://github.com/user-attachments/assets/2769858b-9148-41e1-a872-c6e24738d7b2" />
+)
 
 **KPIs:**
 
